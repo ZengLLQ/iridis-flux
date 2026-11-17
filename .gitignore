@@ -1,0 +1,10 @@
+Manifest.toml
+*.cov
+*.info
+*.mem
+.DS_Store
+__pycache__/
+build/
+dist/
+.vscode/
+.idea/

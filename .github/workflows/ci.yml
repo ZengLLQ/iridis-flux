@@ -1,0 +1,43 @@
+name: IridisFlux CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        version: ['1.10', '1']
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Julia ${{ matrix.version }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+
+      - name: Build Package
+        uses: julia-actions/julia-buildpkg@v1
+
+      - name: Run Test Suite
+        uses: julia-actions/julia-runtest@v1
+
+      - name: Verify CLI and Examples
+        shell: bash
+        run: |
+          julia --project=. bin/iridisflux.jl --help
+          julia --project=. bin/iridisflux.jl simulate --phenotype poag --drug latanoprost --hours 24 --plot
+          julia --project=. bin/iridisflux.jl anterior --steps 40 --plot
+          julia --project=. bin/iridisflux.jl inspect --phenotype ntg
+          julia --project=. examples/01_diurnal_iop_pharmacotherapy.jl
+          julia --project=. examples/02_anterior_chamber_convection.jl
+          julia --project=. examples/03_translaminar_ntg_progression.jl
